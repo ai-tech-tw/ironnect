@@ -20,5 +20,5 @@ RUN chown -R \
 USER 3000
 RUN pip install -r requirements.txt
 
-EXPOSE 5000
-CMD ["gunicorn", "app:app"]
+EXPOSE 8000
+CMD ["sh", "/workplace/startup.sh"]
