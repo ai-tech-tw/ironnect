@@ -2,6 +2,7 @@ FROM python:3.12
 
 ENV RUNTIME_ENV container
 ENV PYTHONUNBUFFERED true
+ENV APP_HOST 0.0.0.0
 
 RUN useradd -u 3000 recv
 
