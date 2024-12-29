@@ -117,7 +117,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-config.yaml
+config.local.py
 
 # Spyder project settings
 .spyderproject
