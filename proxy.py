@@ -16,11 +16,14 @@ def filter_exclude_headers(args: tuple) -> bool:
 
 
 def gemini_openai_proxy(prefix: str, prefill_token: str = ""):
+    endpoint_url = current_app.config["GEMINI_OPENAI_ENDPOINT_URL"]
+
     app_root = current_app.config.get("APPLICATION_ROOT")
     app_root = app_root and app_root.lstrip("/")
+    prefix = prefix and prefix.lstrip("/")
 
-    current_url = urljoin(request.host_url, app_root, prefix)
-    endpoint_url = current_app.config["GEMINI_OPENAI_ENDPOINT_URL"]
+    current_url = urljoin(request.host_url, app_root)
+    current_url = urljoin(current_url, prefix)
 
     request_method = request.method
     request_url = request.url.replace(current_url, endpoint_url)
