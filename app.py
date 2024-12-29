@@ -1,4 +1,5 @@
 from flask import Flask, request
+from flask_cors import cross_origin
 from proxy import gemini_openai_proxy
 
 app = Flask(__name__)
@@ -14,11 +15,13 @@ def greet():
 
 
 @app.route("/v1/<path:_>", methods=["GET", "POST"])
+@cross_origin()
 def openai_pass(_):
     return gemini_openai_proxy("/v1")
 
 
 @app.route("/trial/v1/<path:_>", methods=["GET", "POST"])
+@cross_origin()
 def openai_trial(_):
     prefill_token = app.config.get("GEMINI_OPENAI_PREFILL_TOKEN")
     return gemini_openai_proxy("/trial/v1", prefill_token)
