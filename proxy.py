@@ -6,6 +6,14 @@ from urllib.parse import urljoin
 def filter_exclude_headers(args: tuple) -> bool:
     key = args[0].lower()
     excluded_headers = (
+        "access-control-allow-credentials",
+        "access-control-allow-headers",
+        "access-control-allow-methods",
+        "access-control-allow-origin",
+        "access-control-expose-headers",
+        "access-control-max-age",
+        "access-control-request-headers",
+        "access-control-request-method",
         "transfer-encoding",
         "content-encoding",
         "content-length",
@@ -27,13 +35,12 @@ def gemini_openai_proxy(prefix: str, prefill_token: str = ""):
 
     request_method = request.method
     request_url = request.url.replace(current_url, endpoint_url)
-    request_headers = {
-        k: v for k, v in
-        filter(filter_exclude_headers, request.headers)
-    }
+    request_headers = {k: v for k, v in filter(filter_exclude_headers, request.headers)}
     request_data = request.get_data()
 
-    request_headers["user-agent"] = "Ironnect/1.0 (+https://github.com/ai-tech-tw/ironnect)"
+    request_headers["user-agent"] = (
+        "Ironnect/1.0 (+https://github.com/ai-tech-tw/ironnect)"
+    )
     if prefill_token:
         request_headers["authorization"] = f"Bearer {prefill_token}"
 
