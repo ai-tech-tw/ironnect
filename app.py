@@ -1,9 +1,16 @@
-from flask import Flask
+from flask import Flask, request
 from proxy import gemini_openai_proxy
 
 app = Flask(__name__)
 app.config.from_pyfile("config.py")
 app.config.from_pyfile("config.local.py", silent=True)
+
+
+@app.route("/")
+def greet():
+    hosturl = request.host_url
+    message = f"Greeting! {hosturl}"
+    return message
 
 
 @app.route("/openai/v1/<path:_>", methods=["GET", "POST"])
