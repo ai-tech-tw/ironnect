@@ -18,6 +18,7 @@ def filter_exclude_headers(args: tuple) -> bool:
         "access-control-request-method",
         "transfer-encoding",
         "content-encoding",
+        "accept-encoding",
         "content-length",
         "connection",
         "host",
