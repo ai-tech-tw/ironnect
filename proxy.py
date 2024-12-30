@@ -2,6 +2,8 @@ from flask import current_app, request, Response
 from requests import request as send_request
 from urllib.parse import urljoin
 
+trial_passphrase = "zr3Pjc68z4bOtw=="
+
 
 def filter_exclude_headers(args: tuple) -> bool:
     key = args[0].lower()
@@ -23,14 +25,18 @@ def filter_exclude_headers(args: tuple) -> bool:
     return key not in excluded_headers
 
 
-def gemini_openai_proxy(prefix: str, token: str):
-    endpoint_url = current_app.config["GEMINI_OPENAI_ENDPOINT_URL"]
-    return ai_request_proxy(endpoint_url, prefix, token)
+def openai_proxy_gemini(prefix: str, token: str):
+    endpoint_url = current_app.config["OPENAI_ENDPOINT_URL_GEMINI"]
+    prefill_token = current_app.config.get("AI_TRIAL_PREFILL_TOKEN_GEMINI")
+    request_token = prefill_token if request_token == trial_passphrase else token
+    return ai_request_proxy(endpoint_url, prefix, request_token)
 
 
-def groq_openai_proxy(prefix: str, token: str):
-    endpoint_url = current_app.config["GROQ_OPENAI_ENDPOINT_URL"]
-    return ai_request_proxy(endpoint_url, prefix, token)
+def openai_proxy_groq(prefix: str, token: str):
+    endpoint_url = current_app.config["OPENAI_ENDPOINT_URL_GROQ"]
+    prefill_token = current_app.config.get("AI_TRIAL_PREFILL_TOKEN_GROQ")
+    request_token = prefill_token if request_token == trial_passphrase else token
+    return ai_request_proxy(endpoint_url, prefix, request_token)
 
 
 def ai_request_proxy(endpoint_url: str, prefix: str, token: str):

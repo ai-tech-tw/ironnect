@@ -1,5 +1,5 @@
-GEMINI_OPENAI_ENDPOINT_URL = "https://generativelanguage.googleapis.com/v1beta/openai"
-GEMINI_OPENAI_PREFILL_TOKEN = "your_gemini_token_here"
+OPENAI_ENDPOINT_URL_GEMINI = "https://generativelanguage.googleapis.com/v1beta/openai"
+OPENAI_ENDPOINT_URL_GROQ = "https://api.groq.com/openai/v1"
 
-GROQ_OPENAI_ENDPOINT_URL = "https://api.groq.com/openai/v1"
-GROQ_OPENAI_PREFILL_TOKEN = "your_groq_token_here"
+AI_TRIAL_PREFILL_TOKEN_GEMINI = "your_gemini_token_here"
+AI_TRIAL_PREFILL_TOKEN_GROQ = "your_groq_token_here"
