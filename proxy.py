@@ -23,9 +23,17 @@ def filter_exclude_headers(args: tuple) -> bool:
     return key not in excluded_headers
 
 
-def gemini_openai_proxy(prefix: str, prefill_token: str = ""):
+def gemini_openai_proxy(prefix: str, token: str):
     endpoint_url = current_app.config["GEMINI_OPENAI_ENDPOINT_URL"]
+    return ai_request_proxy(endpoint_url, prefix, token)
 
+
+def groq_openai_proxy(prefix: str, token: str):
+    endpoint_url = current_app.config["GROQ_OPENAI_ENDPOINT_URL"]
+    return ai_request_proxy(endpoint_url, prefix, token)
+
+
+def ai_request_proxy(endpoint_url: str, prefix: str, token: str):
     app_root = current_app.config.get("APPLICATION_ROOT")
     app_root = app_root and app_root.lstrip("/")
     prefix = prefix and prefix.lstrip("/")
@@ -41,8 +49,7 @@ def gemini_openai_proxy(prefix: str, prefill_token: str = ""):
     request_headers["user-agent"] = (
         "Ironnect/1.0 (+https://github.com/ai-tech-tw/ironnect)"
     )
-    if prefill_token:
-        request_headers["authorization"] = f"Bearer {prefill_token}"
+    request_headers["authorization"] = f"Bearer {token}"
 
     proxy_response = send_request(
         method=request_method,
@@ -53,9 +60,8 @@ def gemini_openai_proxy(prefix: str, prefill_token: str = ""):
 
     response_data = proxy_response.content
     response_status = proxy_response.status_code
-    response_headers = filter(
-        filter_exclude_headers,
-        proxy_response.raw.headers.items(),
-    )
+    response_headers = list(proxy_response.raw.headers.items())
+    response_headers.append(("x-ironnect-proxy-endpoint-url", endpoint_url))
+    response_headers = filter(filter_exclude_headers, response_headers)
 
     return Response(response_data, response_status, response_headers)
