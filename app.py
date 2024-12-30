@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.config.from_pyfile("config.py")
 app.config.from_pyfile("config.local.py", silent=True)
 
-trial_passphrase = "bsO9bXBoxJM=" # "nýmphē" in base64
+trial_passphrase = "zr3Pjc68z4bOtw=="
 
 
 @app.route("/")
