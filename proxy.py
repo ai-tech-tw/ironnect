@@ -28,14 +28,14 @@ def filter_exclude_headers(args: tuple) -> bool:
 def openai_proxy_gemini(prefix: str, token: str):
     endpoint_url = current_app.config["OPENAI_ENDPOINT_URL_GEMINI"]
     prefill_token = current_app.config.get("AI_TRIAL_PREFILL_TOKEN_GEMINI")
-    request_token = prefill_token if request_token == trial_passphrase else token
+    request_token = prefill_token if token == trial_passphrase else token
     return ai_request_proxy(endpoint_url, prefix, request_token)
 
 
 def openai_proxy_groq(prefix: str, token: str):
     endpoint_url = current_app.config["OPENAI_ENDPOINT_URL_GROQ"]
     prefill_token = current_app.config.get("AI_TRIAL_PREFILL_TOKEN_GROQ")
-    request_token = prefill_token if request_token == trial_passphrase else token
+    request_token = prefill_token if token == trial_passphrase else token
     return ai_request_proxy(endpoint_url, prefix, request_token)
 
 
