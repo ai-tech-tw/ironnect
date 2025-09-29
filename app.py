@@ -1,6 +1,9 @@
 from flask import Flask, request
 from flask_cors import cross_origin
 
+from local import (
+    openai_local,
+)
 from proxy import (
     openai_proxy_gemini,
     openai_proxy_groq,
@@ -35,6 +38,8 @@ def openai_pass(_):
         request_provider = request_auth_args[1].lower()
         request_token = request_auth_args[2]
 
+    if request_provider == "nymph":
+        return openai_local()
     if request_provider == "gemini":
         return openai_proxy_gemini("/v1", request_token)
     if request_provider == "groq":
