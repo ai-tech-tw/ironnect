@@ -18,29 +18,30 @@ def filter_exclude_headers(args: tuple) -> bool:
         "content-encoding",
         "accept-encoding",
         "content-length",
+        "content-type",
         "connection",
         "host",
     )
     return key not in excluded_headers
 
 
-def openai_proxy_gemini(prefix: str, token: str):
+def openai_proxy_gemini(prefix: str, token: str, override_json: dict = {}):
     endpoint_url = current_app.config["OPENAI_ENDPOINT_URL_GEMINI"]
     trial_passphrase = current_app.config["IRONNECT_TRIAL_PASSPHRASE"]
     prefill_token = current_app.config.get("AI_TRIAL_PREFILL_TOKEN_GEMINI")
     request_token = prefill_token if token == trial_passphrase else token
-    return ai_request_proxy(endpoint_url, prefix, request_token)
+    return ai_request_proxy(endpoint_url, prefix, request_token, override_json=override_json)
 
 
-def openai_proxy_groq(prefix: str, token: str):
+def openai_proxy_groq(prefix: str, token: str, override_json: dict = {}):
     endpoint_url = current_app.config["OPENAI_ENDPOINT_URL_GROQ"]
     trial_passphrase = current_app.config["IRONNECT_TRIAL_PASSPHRASE"]
     prefill_token = current_app.config.get("AI_TRIAL_PREFILL_TOKEN_GROQ")
     request_token = prefill_token if token == trial_passphrase else token
-    return ai_request_proxy(endpoint_url, prefix, request_token)
+    return ai_request_proxy(endpoint_url, prefix, request_token, override_json=override_json)
 
 
-def ai_request_proxy(endpoint_url: str, prefix: str, token: str):
+def ai_request_proxy(endpoint_url: str, prefix: str, token: str, override_json: dict = {}):
     app_root = current_app.config.get("APPLICATION_ROOT")
     app_root = app_root and app_root.lstrip("/")
     prefix = prefix and prefix.lstrip("/")
@@ -51,7 +52,10 @@ def ai_request_proxy(endpoint_url: str, prefix: str, token: str):
     request_method = request.method
     request_url = request.url.replace(current_url, endpoint_url)
     request_headers = {k: v for k, v in filter(filter_exclude_headers, request.headers)}
-    request_data = request.get_data()
+    request_json = request.get_json()
+
+    if override_json:
+        request_json.update(override_json)
 
     request_headers["user-agent"] = (
         "Ironnect/1.0 (+https://github.com/ai-tech-tw/ironnect)"
@@ -62,7 +66,7 @@ def ai_request_proxy(endpoint_url: str, prefix: str, token: str):
         method=request_method,
         url=request_url,
         headers=request_headers,
-        data=request_data,
+        json=request_json,
     )
 
     response_data = proxy_response.content

@@ -11,20 +11,13 @@ def _fetch_inference():
     return Llama(model_path=model_path)
 
 
-def openai_local_iron(token: str = ""):
+def openai_local_iron(token: str = "", override_json: dict = None):
     if token != current_app.config["IRONNECT_TRIAL_PASSPHRASE"]:
         return "Invalid token for the model.", 403
 
-    model_name = current_app.config.get("LOCAL_MODEL_NAME", "")
-    if not model_name:
-        return "Model is not configured.", 500
-
     json_data = request.get_json()
+    if override_json:
+        json_data.update(override_json)
     inference = _fetch_inference()
 
-    result = inference.create_chat_completion(**json_data)
-
-    response = jsonify(result)
-    response.headers.add_header("x-ironnect-model-name", model_name)
-
-    return response
+    return inference.create_chat_completion(**json_data)
