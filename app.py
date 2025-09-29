@@ -1,10 +1,8 @@
 from flask import Flask, request
 from flask_cors import cross_origin
 
-from local import (
-    openai_local,
-)
-from proxy import (
+from providers import (
+    openai_local_iron,
     openai_proxy_gemini,
     openai_proxy_groq,
 )
@@ -12,6 +10,7 @@ from proxy import (
 app = Flask(__name__)
 app.config.from_pyfile("config.py")
 app.config.from_pyfile("config.local.py", silent=True)
+app.config["IRONNECT_TRIAL_PASSPHRASE"] = "zr3Pjc68z4bOtw=="
 
 
 @app.route("/")
@@ -38,8 +37,31 @@ def openai_pass(_):
         request_provider = request_auth_args[1].lower()
         request_token = request_auth_args[2]
 
+    # The always available provider for LLMs
     if request_provider == "nymph":
-        return openai_local()
+        # Try to use Gemini first, then Groq, otherwise using local model
+        trial_passphrase = app.config["IRONNECT_TRIAL_PASSPHRASE"]
+        try:
+            response = openai_proxy_gemini("/v1", trial_passphrase)
+            if response.status_code != 200:
+                raise Exception("Provider request failed")
+            return response
+        except Exception:
+            pass
+        
+        try:
+            response = openai_proxy_groq("/v1", trial_passphrase)
+            if response.status_code != 200:
+                raise Exception("Provider request failed")
+            return response
+        except Exception:
+            pass
+
+        return openai_local_iron(trial_passphrase)
+
+    # Specified providers for using LLMs
+    if request_provider == "iron":
+        return openai_local_iron()
     if request_provider == "gemini":
         return openai_proxy_gemini("/v1", request_token)
     if request_provider == "groq":

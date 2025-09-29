@@ -2,8 +2,6 @@ from flask import current_app, request, Response
 from requests import request as send_request
 from urllib.parse import urljoin
 
-trial_passphrase = "zr3Pjc68z4bOtw=="
-
 
 def filter_exclude_headers(args: tuple) -> bool:
     key = args[0].lower()
@@ -28,6 +26,7 @@ def filter_exclude_headers(args: tuple) -> bool:
 
 def openai_proxy_gemini(prefix: str, token: str):
     endpoint_url = current_app.config["OPENAI_ENDPOINT_URL_GEMINI"]
+    trial_passphrase = current_app.config["IRONNECT_TRIAL_PASSPHRASE"]
     prefill_token = current_app.config.get("AI_TRIAL_PREFILL_TOKEN_GEMINI")
     request_token = prefill_token if token == trial_passphrase else token
     return ai_request_proxy(endpoint_url, prefix, request_token)
@@ -35,6 +34,7 @@ def openai_proxy_gemini(prefix: str, token: str):
 
 def openai_proxy_groq(prefix: str, token: str):
     endpoint_url = current_app.config["OPENAI_ENDPOINT_URL_GROQ"]
+    trial_passphrase = current_app.config["IRONNECT_TRIAL_PASSPHRASE"]
     prefill_token = current_app.config.get("AI_TRIAL_PREFILL_TOKEN_GROQ")
     request_token = prefill_token if token == trial_passphrase else token
     return ai_request_proxy(endpoint_url, prefix, request_token)
