@@ -26,7 +26,7 @@ def filter_exclude_headers(args: tuple) -> bool:
 
 
 def openai_proxy_gemini(prefix: str, token: str, override_json: dict = {}):
-    endpoint_url = current_app.config["OPENAI_ENDPOINT_URL_GEMINI"]
+    endpoint_url = current_app.config["AI_PROXY_ENDPOINT_URL_GEMINI"]
     trial_passphrase = current_app.config["IRONNECT_TRIAL_PASSPHRASE"]
     prefill_token = current_app.config.get("AI_TRIAL_PREFILL_TOKEN_GEMINI")
     request_token = prefill_token if token == trial_passphrase else token
@@ -34,7 +34,7 @@ def openai_proxy_gemini(prefix: str, token: str, override_json: dict = {}):
 
 
 def openai_proxy_groq(prefix: str, token: str, override_json: dict = {}):
-    endpoint_url = current_app.config["OPENAI_ENDPOINT_URL_GROQ"]
+    endpoint_url = current_app.config["AI_PROXY_ENDPOINT_URL_GROQ"]
     trial_passphrase = current_app.config["IRONNECT_TRIAL_PASSPHRASE"]
     prefill_token = current_app.config.get("AI_TRIAL_PREFILL_TOKEN_GROQ")
     request_token = prefill_token if token == trial_passphrase else token
@@ -58,7 +58,7 @@ def ai_request_proxy(endpoint_url: str, prefix: str, token: str, override_json: 
         request_json.update(override_json)
 
     request_headers["user-agent"] = (
-        "Ironnect/1.0 (+https://github.com/ai-tech-tw/ironnect)"
+        "Ironnect/1.1 (+https://github.com/ai-tech-tw/ironnect)"
     )
     request_headers["authorization"] = f"Bearer {token}"
 

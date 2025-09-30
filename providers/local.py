@@ -5,7 +5,7 @@ from llama_cpp import Llama
 
 @lru_cache()
 def _fetch_inference():
-    model_path = current_app.config.get("LOCAL_MODEL_PATH", "")
+    model_path = current_app.config.get("AI_LOCAL_MODEL_PATH_IRON", "")
     if not model_path:
         raise ValueError("Local model path is not configured.")
     return Llama(model_path=model_path)

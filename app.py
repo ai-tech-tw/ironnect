@@ -53,14 +53,19 @@ def openai_pass(_):
 
 
 def provider_nymph():
-    # Try to use Gemini first, then Groq, otherwise using local model
+    # Try to use Gemini first, then Groq, otherwise using the Iron model
     trial_passphrase = app.config["IRONNECT_TRIAL_PASSPHRASE"]
+
+    trial_model_gemini = app.config["AI_TRIAL_NYMPH_MODEL_GEMINI"]
+    trial_model_groq = app.config["AI_TRIAL_NYMPH_MODEL_GROQ"]
+    trial_model_iron = app.config["AI_TRIAL_NYMPH_MODEL_IRON"]
+
     try:
         response = openai_proxy_gemini(
             "/v1",
             trial_passphrase,
             {
-                "model": "gemini-2.0-flash",
+                "model": trial_model_gemini,
             },
         )
         if response.status_code != 200:
@@ -74,7 +79,7 @@ def provider_nymph():
             "/v1",
             trial_passphrase,
             {
-                "model": "llama3-70b-chat",
+                "model": trial_model_groq,
             },
         )
         if response.status_code != 200:
@@ -86,7 +91,7 @@ def provider_nymph():
     return openai_local_iron(
         trial_passphrase,
         {
-            "model": "gemma-3-270m-it",
+            "model": trial_model_iron,
         },
     )
 
