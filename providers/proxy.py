@@ -41,6 +41,14 @@ def openai_proxy_groq(prefix: str, token: str, override_json: dict = {}):
     return ai_request_proxy(endpoint_url, prefix, request_token, override_json=override_json)
 
 
+def openai_proxy_cerebras(prefix: str, token: str, override_json: dict = {}):
+    endpoint_url = current_app.config["AI_PROXY_ENDPOINT_URL_CEREBRAS"]
+    trial_passphrase = current_app.config["IRONNECT_TRIAL_PASSPHRASE"]
+    prefill_token = current_app.config.get("AI_TRIAL_PREFILL_TOKEN_CEREBRAS")
+    request_token = prefill_token if token == trial_passphrase else token
+    return ai_request_proxy(endpoint_url, prefix, request_token, override_json=override_json)
+
+
 def ai_request_proxy(endpoint_url: str, prefix: str, token: str, override_json: dict = {}):
     app_root = current_app.config.get("APPLICATION_ROOT")
     app_root = app_root and app_root.lstrip("/")

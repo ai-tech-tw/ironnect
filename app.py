@@ -5,6 +5,7 @@ from providers import (
     openai_local_iron,
     openai_proxy_gemini,
     openai_proxy_groq,
+    openai_proxy_cerebras,
 )
 
 app = Flask(__name__)
@@ -44,6 +45,8 @@ def openai_pass(_):
     # Specified providers for using LLMs
     if request_provider == "iron":
         return provider_iron(request_token)
+    if request_provider == "cerebras":
+        return provider_cerebras(request_token)
     if request_provider == "gemini":
         return provider_gemini(request_token)
     if request_provider == "groq":
@@ -56,9 +59,24 @@ def provider_nymph():
     # Try to use Gemini first, then Groq, otherwise using the Iron model
     trial_passphrase = app.config["IRONNECT_TRIAL_PASSPHRASE"]
 
+    trial_model_cerebras = app.config["AI_TRIAL_NYMPH_MODEL_CEREBRAS"]
     trial_model_gemini = app.config["AI_TRIAL_NYMPH_MODEL_GEMINI"]
     trial_model_groq = app.config["AI_TRIAL_NYMPH_MODEL_GROQ"]
     trial_model_iron = app.config["AI_TRIAL_NYMPH_MODEL_IRON"]
+
+    try:
+        response = openai_proxy_cerebras(
+            "/v1",
+            trial_passphrase,
+            {
+                "model": trial_model_cerebras,
+            },
+        )
+        if response.status_code != 200:
+            raise Exception("Provider request failed")
+        return response
+    except Exception:
+        pass
 
     try:
         response = openai_proxy_gemini(
@@ -98,6 +116,10 @@ def provider_nymph():
 
 def provider_iron(request_token):
     return openai_local_iron(request_token)
+
+
+def provider_cerebras(request_token: str):
+    return openai_proxy_cerebras("/v1", request_token)
 
 
 def provider_gemini(request_token: str):
