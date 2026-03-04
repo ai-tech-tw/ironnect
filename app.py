@@ -44,10 +44,12 @@ def openai_pass(_):
     if request_provider == "iron":
         return openai_local(request_token)
 
+    # Other providers by proxy, with the order of priority defined in the config
     proxy_providers = app.config["AI_PROXY_PROVIDERS"]
     if request_provider in proxy_providers:
         return openai_proxy(request_provider, "/v1", request_token)
 
+    # No provider matched, return an error
     return "Unknown provider you requested.", 404
 
 
