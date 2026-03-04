@@ -11,7 +11,7 @@ def _fetch_inference():
     return Llama(model_path=model_path)
 
 
-def openai_local_iron(token: str = "", override_json: dict = None):
+def openai_local(token: str = "", override_json: dict = None):
     if token != current_app.config["IRONNECT_TRIAL_PASSPHRASE"]:
         return "Invalid token for the model.", 403
 

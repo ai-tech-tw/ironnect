@@ -1,11 +1,11 @@
 from .local import (
-    openai_local_iron,
+    openai_local,
 )
 from .proxy import (
     openai_proxy,
 )
 
 __all__ = [
-    "openai_local_iron",
+    "openai_local",
     "openai_proxy",
 ]

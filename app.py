@@ -2,7 +2,7 @@ from flask import Flask, request
 from flask_cors import cross_origin
 
 from providers import (
-    openai_local_iron,
+    openai_local,
     openai_proxy,
 )
 
@@ -42,7 +42,7 @@ def openai_pass(_):
 
     # Specified providers for using LLMs
     if request_provider == "iron":
-        return openai_local_iron(request_token)
+        return openai_local(request_token)
 
     proxy_providers = app.config["AI_PROXY_PROVIDERS"]
     if request_provider in proxy_providers:
@@ -78,7 +78,7 @@ def provider_nymph():
 
     # Iron is always the final fallback
     trial_model_iron = app.config["AI_TRIAL_NYMPH_MODEL_IRON"]
-    return openai_local_iron(
+    return openai_local(
         trial_passphrase,
         {
             "model": trial_model_iron,
