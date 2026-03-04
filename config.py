@@ -1,3 +1,5 @@
+AI_PROXY_PROVIDERS = ["cerebras", "gemini", "groq"]
+
 AI_PROXY_ENDPOINT_URL_CEREBRAS = "https://api.cerebras.ai/v1"
 AI_PROXY_ENDPOINT_URL_GEMINI = "https://generativelanguage.googleapis.com/v1beta/openai"
 AI_PROXY_ENDPOINT_URL_GROQ = "https://api.groq.com/openai/v1"

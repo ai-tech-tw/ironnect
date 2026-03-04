@@ -3,9 +3,7 @@ from flask_cors import cross_origin
 
 from providers import (
     openai_local_iron,
-    openai_proxy_gemini,
-    openai_proxy_groq,
-    openai_proxy_cerebras,
+    openai_proxy,
 )
 
 app = Flask(__name__)
@@ -44,87 +42,45 @@ def openai_pass(_):
 
     # Specified providers for using LLMs
     if request_provider == "iron":
-        return provider_iron(request_token)
-    if request_provider == "cerebras":
-        return provider_cerebras(request_token)
-    if request_provider == "gemini":
-        return provider_gemini(request_token)
-    if request_provider == "groq":
-        return provider_groq(request_token)
+        return openai_local_iron(request_token)
+
+    proxy_providers = app.config["AI_PROXY_PROVIDERS"]
+    if request_provider in proxy_providers:
+        return openai_proxy(request_provider, "/v1", request_token)
 
     return "Unknown provider you requested.", 404
 
 
 def provider_nymph():
-    # Try to use Gemini first, then Groq, otherwise using the Iron model
+    # Try each proxy provider in order, with Iron as the final fallback
     trial_passphrase = app.config["IRONNECT_TRIAL_PASSPHRASE"]
+    proxy_providers = app.config["AI_PROXY_PROVIDERS"]
 
-    trial_model_cerebras = app.config["AI_TRIAL_NYMPH_MODEL_CEREBRAS"]
-    trial_model_gemini = app.config["AI_TRIAL_NYMPH_MODEL_GEMINI"]
-    trial_model_groq = app.config["AI_TRIAL_NYMPH_MODEL_GROQ"]
+    for provider in proxy_providers:
+        provider_upper = provider.upper()
+        trial_model = app.config.get(f"AI_TRIAL_NYMPH_MODEL_{provider_upper}")
+        if not trial_model:
+            continue
+        try:
+            response = openai_proxy(
+                provider,
+                "/v1",
+                trial_passphrase,
+                {
+                    "model": trial_model,
+                },
+            )
+            if response.status_code != 200:
+                raise Exception("Provider request failed")
+            return response
+        except Exception:
+            pass
+
+    # Iron is always the final fallback
     trial_model_iron = app.config["AI_TRIAL_NYMPH_MODEL_IRON"]
-
-    try:
-        response = openai_proxy_cerebras(
-            "/v1",
-            trial_passphrase,
-            {
-                "model": trial_model_cerebras,
-            },
-        )
-        if response.status_code != 200:
-            raise Exception("Provider request failed")
-        return response
-    except Exception:
-        pass
-
-    try:
-        response = openai_proxy_gemini(
-            "/v1",
-            trial_passphrase,
-            {
-                "model": trial_model_gemini,
-            },
-        )
-        if response.status_code != 200:
-            raise Exception("Provider request failed")
-        return response
-    except Exception:
-        pass
-
-    try:
-        response = openai_proxy_groq(
-            "/v1",
-            trial_passphrase,
-            {
-                "model": trial_model_groq,
-            },
-        )
-        if response.status_code != 200:
-            raise Exception("Provider request failed")
-        return response
-    except Exception:
-        pass
-
     return openai_local_iron(
         trial_passphrase,
         {
             "model": trial_model_iron,
         },
     )
-
-
-def provider_iron(request_token):
-    return openai_local_iron(request_token)
-
-
-def provider_cerebras(request_token: str):
-    return openai_proxy_cerebras("/v1", request_token)
-
-
-def provider_gemini(request_token: str):
-    return openai_proxy_gemini("/v1", request_token)
-
-
-def provider_groq(request_token: str):
-    return openai_proxy_groq("/v1", request_token)
