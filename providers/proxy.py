@@ -31,6 +31,8 @@ OVERRIDE_SUPPORTED_API_TYPES = ("chat/completions", "completions")
 def openai_proxy(provider: str, prefix: str, token: str, api_type: str = ""):
     provider_upper = provider.upper()
     endpoint_url = current_app.config.get(f"AI_PROXY_ENDPOINT_URL_{provider_upper}", "")
+    if not endpoint_url:
+        return f"Endpoint URL for provider {provider} is not configured.", 500
     trial_passphrase = current_app.config.get("IRONNECT_TRIAL_PASSPHRASE", "")
     prefill_token = current_app.config.get(f"AI_TRIAL_PREFILL_TOKEN_{provider_upper}")
     request_token = prefill_token if token == trial_passphrase else token
