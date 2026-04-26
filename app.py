@@ -50,7 +50,13 @@ def openai_pass(req_path: str):
     # Other providers by proxy, with the order of priority defined in the config
     proxy_providers = app.config.get("AI_PROXY_PROVIDERS", [])
     if request_provider in proxy_providers:
-        return openai_proxy(request_provider, "/v1", request_token)
+        override = {}
+        trial_passphrase = app.config.get("IRONNECT_TRIAL_PASSPHRASE")
+        if trial_passphrase and request_token == trial_passphrase:
+            trial_model = app.config.get(f"AI_TRIAL_NYMPH_MODEL_{request_provider.upper()}")
+            if trial_model:
+                override["model"] = trial_model
+        return openai_proxy(request_provider, "/v1", request_token, override)
 
     # No provider matched, return an error
     return "Unknown provider you requested.", 404
