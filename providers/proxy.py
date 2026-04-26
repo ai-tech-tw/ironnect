@@ -55,9 +55,9 @@ def ai_request_proxy(endpoint_url: str, prefix: str, token: str, override_json: 
     request_method = request.method
     request_url = request.url.replace(current_url, endpoint_url)
     request_headers = {k: v for k, v in filter(filter_exclude_headers, request.headers)}
-    request_json = request.get_json() or {}
+    request_json = (request.get_json() or {}).copy() if override_json else request.get_json()
 
-    if override_json:
+    if override_json and request_json is not None:
         request_json.update(override_json)
 
     request_headers["user-agent"] = (
