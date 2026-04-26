@@ -19,9 +19,9 @@ def greet():
     return message
 
 
-@app.route("/v1/<path:_>", methods=["GET", "POST"])
+@app.route("/v1/<path:req_path>", methods=["GET", "POST"])
 @cross_origin()
-def openai_pass(_):
+def openai_pass(req_path: str):
     request_headers = request.headers
     request_auth = request_headers.get("authorization", "")
 
@@ -35,6 +35,9 @@ def openai_pass(_):
     else:
         request_provider = request_auth_args[1].lower()
         request_token = request_auth_args[2]
+
+    if req_path not in app.config["AI_PROXY_ALLOWED_PATHS"]:
+        return "The requested path is not allowed.", 403
 
     # The always available provider for LLMs
     if request_provider == "nymph":
