@@ -36,7 +36,7 @@ def openai_proxy(provider: str, prefix: str, token: str, api_type: str = ""):
     request_token = prefill_token if token == trial_passphrase else token
 
     override_json = {}
-    if token == trial_passphrase and api_type in OVERRIDE_SUPPORTED_API_TYPES:
+    if token == trial_passphrase and api_type.rstrip("/") in OVERRIDE_SUPPORTED_API_TYPES:
         trial_model = current_app.config.get(f"AI_TRIAL_NYMPH_MODEL_{provider_upper}")
         if trial_model:
             override_json["model"] = trial_model
@@ -55,9 +55,9 @@ def ai_request_proxy(endpoint_url: str, prefix: str, token: str, override_json: 
     request_method = request.method
     request_url = request.url.replace(current_url, endpoint_url)
     request_headers = {k: v for k, v in filter(filter_exclude_headers, request.headers)}
-    request_json = (request.get_json() or {}).copy() if override_json else request.get_json()
-
-    if override_json and request_json is not None:
+    request_json = request.get_json()
+    if override_json and (request_json is None or isinstance(request_json, dict)):
+        request_json = (request_json or {}).copy()
         request_json.update(override_json)
 
     request_headers["user-agent"] = (
