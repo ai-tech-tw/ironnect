@@ -25,16 +25,26 @@ def filter_exclude_headers(args: tuple) -> bool:
     return key not in excluded_headers
 
 
-def openai_proxy(provider: str, prefix: str, token: str, override_json: dict = {}):
+OVERRIDE_SUPPORTED_API_TYPES = ("chat/completions", "completions")
+
+
+def openai_proxy(provider: str, prefix: str, token: str, api_type: str = ""):
     provider_upper = provider.upper()
     endpoint_url = current_app.config.get(f"AI_PROXY_ENDPOINT_URL_{provider_upper}", "")
     trial_passphrase = current_app.config.get("IRONNECT_TRIAL_PASSPHRASE", "")
     prefill_token = current_app.config.get(f"AI_TRIAL_PREFILL_TOKEN_{provider_upper}")
     request_token = prefill_token if token == trial_passphrase else token
+
+    override_json = {}
+    if token == trial_passphrase and api_type in OVERRIDE_SUPPORTED_API_TYPES:
+        trial_model = current_app.config.get(f"AI_TRIAL_NYMPH_MODEL_{provider_upper}")
+        if trial_model:
+            override_json["model"] = trial_model
+
     return ai_request_proxy(endpoint_url, prefix, request_token, override_json=override_json)
 
 
-def ai_request_proxy(endpoint_url: str, prefix: str, token: str, override_json: dict = {}):
+def ai_request_proxy(endpoint_url: str, prefix: str, token: str, override_json: dict | None = None):
     app_root = current_app.config.get("APPLICATION_ROOT")
     app_root = app_root and app_root.lstrip("/")
     prefix = prefix and prefix.lstrip("/")
@@ -47,7 +57,7 @@ def ai_request_proxy(endpoint_url: str, prefix: str, token: str, override_json: 
     request_headers = {k: v for k, v in filter(filter_exclude_headers, request.headers)}
     request_json = request.get_json()
 
-    if override_json:
+    if override_json and request_json is not None:
         request_json.update(override_json)
 
     request_headers["user-agent"] = (
