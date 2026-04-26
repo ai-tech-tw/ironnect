@@ -30,7 +30,7 @@ def openai_pass(req_path: str):
         return "Invalid Authorization header.", 400
 
     if len(request_auth_args) == 2:
-        request_provider = "gemini"
+        request_provider = "nymph"
         request_token = request_auth_args[1]
     else:
         request_provider = request_auth_args[1].lower()
