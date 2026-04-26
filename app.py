@@ -58,7 +58,9 @@ def openai_pass(req_path: str):
 
 def provider_nymph():
     # Try each proxy provider in order, with Iron as the final fallback
-    trial_passphrase = app.config.get("IRONNECT_TRIAL_PASSPHRASE", "")
+    trial_passphrase = app.config.get("IRONNECT_TRIAL_PASSPHRASE")
+    if not trial_passphrase:
+        return "Trial passphrase not configured", 500
     proxy_providers = app.config.get("AI_PROXY_PROVIDERS", [])
 
     for provider in proxy_providers:
