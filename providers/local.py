@@ -12,7 +12,7 @@ def _fetch_inference():
 
 
 def openai_local(token: str = "", override_json: dict = None):
-    if token != current_app.config["IRONNECT_TRIAL_PASSPHRASE"]:
+    if not token or token != current_app.config.get("IRONNECT_TRIAL_PASSPHRASE"):
         return "Invalid token for the model.", 403
 
     json_data = request.get_json()
