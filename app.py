@@ -1,5 +1,6 @@
-from flask import Flask, HTTPException, request
+from flask import Flask, request
 from flask_cors import cross_origin
+from werkzeug.exceptions import HTTPException
 
 from providers import (
     openai_local,

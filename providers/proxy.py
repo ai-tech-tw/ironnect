@@ -1,6 +1,7 @@
-from flask import current_app, request, Response, HTTPException  
+from flask import current_app, request, Response
 from requests import request as send_request
 from urllib.parse import urljoin
+from werkzeug.exceptions import HTTPException
 
 
 def filter_exclude_headers(args: tuple) -> bool:
