@@ -1,4 +1,4 @@
-from flask import current_app, request, Response
+from flask import current_app, request, Response, HTTPException  
 from requests import request as send_request
 from urllib.parse import urljoin
 
@@ -36,6 +36,9 @@ def openai_proxy(provider: str, prefix: str, token: str, api_type: str = ""):
     trial_passphrase = current_app.config.get("IRONNECT_TRIAL_PASSPHRASE", "")
     prefill_token = current_app.config.get(f"AI_TRIAL_PREFILL_TOKEN_{provider_upper}")
     request_token = prefill_token if token == trial_passphrase else token
+
+    if not request_token:
+        raise HTTPException(f"Request token for provider {provider} is empty.", 401)
 
     override_json = {}
     if token == trial_passphrase and api_type.rstrip("/") in OVERRIDE_SUPPORTED_API_TYPES:

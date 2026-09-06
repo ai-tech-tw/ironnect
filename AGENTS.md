@@ -44,7 +44,7 @@ Ironnect supports three routing modes, all accessed via `Authorization: Bearer <
 
 1. **`nymph` (default / trial)**: Automatically tries each configured proxy provider in priority order, falling back to the local Iron model. Intended for trial access using the built-in passphrase.
 2. **`iron` (local)**: Routes requests to the on-device GGUF model loaded via `llama-cpp-python`. Requires the valid trial passphrase as the token.
-3. **Named proxy providers** (e.g., `cerebras`): Proxies the request to an external OpenAI-compatible API endpoint, substituting the user's token or the configured prefill token if the trial passphrase is presented.
+3. **Named proxy providers** (e.g., `OpenAI`): Proxies the request to an external OpenAI-compatible API endpoint, substituting the user's token or the configured prefill token if the trial passphrase is presented.
 
 ### Core Components
 
@@ -60,9 +60,9 @@ graph TD
     Client["API Client"] -->|"Bearer <provider> <token>"| Flask["Flask App (app.py)"]
     Flask -->|iron| Local["Local Provider (llama-cpp-python)"]
     Flask -->|nymph| Nymph["Nymph Router (tries proxies → falls back to iron)"]
-    Flask -->|cerebras / other| Proxy["Proxy Provider (providers/proxy.py)"]
+    Flask -->|OpenAI / other| Proxy["Proxy Provider (providers/proxy.py)"]
     Local --> GGUF["Local GGUF Model"]
-    Proxy --> ExtAPI["External API (e.g., Cerebras)"]
+    Proxy --> ExtAPI["External API (e.g., OpenAI)"]
     Nymph --> Proxy
     Nymph --> Local
 ```

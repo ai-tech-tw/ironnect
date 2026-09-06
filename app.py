@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, HTTPException, request
 from flask_cors import cross_origin
 
 from providers import (
@@ -27,7 +27,7 @@ def openai_pass(req_path: str):
 
     request_auth_args = request_auth.split(" ", 3)
     if len(request_auth_args) < 2 or request_auth_args[0].lower() != "bearer":
-        return "Invalid Authorization header.", 400
+        raise HTTPException("Invalid Authorization header.", 400)
 
     if len(request_auth_args) == 2:
         request_provider = "nymph"
@@ -37,11 +37,11 @@ def openai_pass(req_path: str):
         request_token = request_auth_args[2]
 
     if req_path not in app.config.get("AI_PROXY_ALLOWED_PATHS", []):
-        return "The requested path is not allowed.", 403
+        raise HTTPException("The requested path is not allowed.", 403)
 
     # The always available provider for LLMs
     if request_provider == "nymph":
-        return provider_nymph(req_path)
+        return provider_nymph(request_token, req_path)
 
     # Specified providers for using LLMs
     if request_provider == "iron":
@@ -53,14 +53,16 @@ def openai_pass(req_path: str):
         return openai_proxy(request_provider, "/v1", request_token, req_path)
 
     # No provider matched, return an error
-    return "Unknown provider you requested.", 404
+    raise HTTPException(f"Unknown provider you requested: {request_provider}", 404)
 
 
-def provider_nymph(api_type: str = ""):
+def provider_nymph(request_token: str, api_type: str = ""):
     # Try each proxy provider in order, with Iron as the final fallback
     trial_passphrase = app.config.get("IRONNECT_TRIAL_PASSPHRASE")
     if not trial_passphrase:
-        return "Trial passphrase not configured", 500
+        raise HTTPException("Internal Server Error: Trial passphrase not configured.", 500)    
+    if request_token != trial_passphrase:
+        raise HTTPException("Invalid token for the model.", 403)    
     proxy_providers = app.config.get("AI_PROXY_PROVIDERS", [])
 
     for provider in proxy_providers:
@@ -75,10 +77,11 @@ def provider_nymph(api_type: str = ""):
                 api_type,
             )
             if response.status_code != 200:
-                raise Exception("Provider request failed")
+                print(f"Provider {provider} request failed: {response.status_code}")
+                continue
             return response
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Provider {provider} request failed: {e}")
 
     # Iron is always the final fallback
     trial_model_iron = app.config.get("AI_TRIAL_NYMPH_MODEL_IRON", "")
